@@ -1,0 +1,35 @@
+The complex inner life of simple regression
+========================================================
+author: Matthew Rudd
+date: 17 November 2020
+autosize: true
+
+A famous example
+========================================================
+left: 50%
+
+Heights of 1,078 fathers and sons
+
+***
+
+```{r echo=F,message=F,warnings=F}
+library(tidyverse,gghighlight)
+
+heights <- read_csv("pearson.csv")
+ggplot(heights,aes(Father,Son))+geom_point()
+```
+
+The simple linear regression model
+========================================================
+
+$y = \beta_{0} + \beta_{1}x + \epsilon$
+
+The Gauss-Markov Theorem
+========================================================
+
+you know, OLS is BLUE and whatnot
+
+Chebyshev's Theorem
+========================================================
+
+75% of observations are within 2 SDs -- no matter what!
