@@ -6,18 +6,15 @@ autosize: true
 
 A famous example
 ========================================================
-left: 50%
 
 Heights of 1,078 fathers and sons
 
-***
-
-![plot of chunk unnamed-chunk-1](simple-figure/unnamed-chunk-1-1.png)
 
 The simple linear regression model
 ========================================================
 
-$y = \beta_{0} + \beta_{1}x + \epsilon$
+blah $\beta$
+
 
 The Gauss-Markov Theorem
 ========================================================
