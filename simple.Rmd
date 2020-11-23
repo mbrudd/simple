@@ -1,0 +1,28 @@
+---
+title: "The complex inner life of simple regression"
+author: "Matthew Rudd"
+date: "12/1/2020"
+output:
+  ioslides_presentation: default
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+## A famous example
+
+Heights of 1,078 fathers and sons
+
+
+## The simple linear regression model
+
+blah $\beta$
+
+
+## The Gauss-Markov Theorem
+
+you know, OLS is BLUE and whatnot
+
+
+## Chebyshev's Theorem
+
+75% of observations are within 2 SDs -- no matter what!
