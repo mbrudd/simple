@@ -1,28 +1,131 @@
 ---
 title: "The complex inner life of simple regression"
 author: "Matthew Rudd"
-date: "12/1/2020"
+date: "Math for Data Science Conference, 12/1/20"
 output:
   ioslides_presentation: default
   beamer_presentation: default
   slidy_presentation: default
 ---
 
-## A famous example
+## Pearson-Lee height data
 
-Heights of 1,078 fathers and sons
+```{r echo=F,warning=F,message=F}
+library(tidyverse)
+library(gghighlight)
 
+heights <- read_csv("pearson.csv")
+heights <- heights %>% mutate(Group = round(Father))
+son.stats <- heights %>% group_by(Group) %>% summarize(N = n(), Average = round(mean(Son),2), SD = round(sd(Son),2))
+ggplot(stack(heights),aes(values))+geom_histogram()+xlab("Heights of fathers and sons")
+
+```
+
+## Pearson-Lee height data
+
+>- Best guess: the average height, `r round(mean( stack(heights)$values ),2)` inches
+
+>- Probably off by 1 or 2 SDs, `r round(sd( stack(heights)$values ),2)` to `r round(2*sd( stack(heights)$values ),2)` inches
+
+>- For better predictions, use more information!
+
+## Pearson-Lee height data
+
+```{r echo=F,warning=F,message=F}
+ggplot( heights, aes(Father,Son) ) + geom_point()
+```
+
+## Pearson-Lee height data {.smaller}
+
+```{r echo=F,warning=F,message=F}
+son.table <- tibble("Father's height"=son.stats$Group, "Number of sons"=son.stats$N, "Average height"=son.stats$Average, SD=son.stats$SD)
+knitr::kable( son.table[4:15,] )
+```
+
+## Pearson-Lee height data
+
+```{r echo=F,warning=F,message=F}
+ggplot( heights, aes(Father,Son) ) + geom_point() + gghighlight(Group == 65)
+```
+
+## Pearson-Lee height data
+
+```{r echo=F,warning=F,message=F}
+ggplot( heights, aes(Father,Son) ) + geom_point() + gghighlight(Group == 71)
+```
+
+## Pearson-Lee height data
+
+```{r echo=F,warning=F,message=F}
+ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats, aes(Group, Average), color="red", size=3)
+```
+
+## Pearson-Lee height data
+
+```{r echo=F,warning=F,message=F}
+ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats, aes(Group, Average), color="red", size=3)+ geom_smooth( method="lm", level=0 )
+
+```
+
+## Pearson-Lee height data
+
+>- The average height of a group of sons depends linearly on the father's given height
+
+>- Using this data, $$\text{Average height of sons} = 33.89 + .514 \times \text{Father's height} \, ,$$ $$\text{i.e.}, \quad E( y \mid x ) = 33.89 + .514 \, x \ .$$
+>- This is _simple linear regression_, handled by `lm` in R :
+
+## Pearson-Lee height data {.smaller}
+
+```{r echo=F,warning=F,message=F}
+fit <- lm( Son ~ Father, data = heights)
+summary(fit)
+```
+
+## Pearson-Lee height data
+
+This dataset illustrates regression nicely, but
+
+>- regression isn't really needed here, and
+
+>- things are  actually _too nice_ in this example!
+
+## UN data
+
+Introduce the UN data
 
 ## The simple linear regression model
 
-blah $\beta$
+>- We use simple linear regression when we believe that $$y = \beta_{0} + \beta_{1} x + \epsilon \ . $$
+>- *Assumption #1*: observations of the predictor, $x$, are known _exactly_ and are _uncorrelated_.
+>- *Assumption #2*: the random error term $\epsilon$ has _constant variance_ and _mean zero_.
+>- Consequence: $$E(y \mid x) = \beta_{0} + \beta_{1}x$$
 
+## The simple linear regression model
+
+>- This model only makes sense if the mean response is a reasonable summary of $y$.
+>- Neither the model parameters nor the additive error can be observed; they can only be estimated from observations.
+>- Nothing is assumed to be normally distributed...
+>- yet inferences and model assessment are still possible!
 
 ## The Gauss-Markov Theorem
 
-you know, OLS is BLUE and whatnot
+>- Concisely: OLS is BLUE
 
+## Markov's Inequality
 
-## Chebyshev's Theorem
+## Chebyshev's Inequality
 
 75% of observations are within 2 SDs -- no matter what!
+
+## The coefficient of determination
+
+blah
+
+## Categorical data is not quantitative
+
+blah
+
+## The normal regression model
+
+t-scores and whatnot, variable selection, ...
+
