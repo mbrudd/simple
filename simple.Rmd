@@ -23,10 +23,9 @@ ggplot(stack(heights),aes(values))+geom_histogram()+xlab("Heights of fathers and
 
 ## Pearson-Lee height data
 
+>- These heights are roughly $\, N(68.19, 2.82) \,$, so...
 >- Best guess: the average height, `r round(mean( stack(heights)$values ),2)` inches
-
 >- Probably off by 1 or 2 SDs, `r round(sd( stack(heights)$values ),2)` to `r round(2*sd( stack(heights)$values ),2)` inches
-
 >- For better predictions, use more information!
 
 ## Pearson-Lee height data
