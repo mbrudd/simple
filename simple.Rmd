@@ -8,7 +8,7 @@ output:
   slidy_presentation: default
 ---
 
-## Pearson-Lee height data
+## Pearson-Lee height data 
 
 ```{r echo=F,warning=F,message=F}
 library(tidyverse)
@@ -20,9 +20,11 @@ ensemble.ave <- mean( ensemble$values )
 ensemble.sd <- sd( ensemble$values )
 heights <- heights %>% mutate(Group = round(Father))
 son.stats <- heights %>% group_by(Group) %>% summarize(N = n(), Average = round(mean(Son),2), SD = round(sd(Son),2))
-ggplot(ensemble,aes(values))+geom_histogram()+geom_vline(xintercept=ensemble.ave+ensemble.sd*c(-2,0,2),color="dodgerblue",linetype="dashed")+xlab("Heights of fathers and sons")
+ggplot(ensemble,aes(values))+geom_histogram()+geom_vline(xintercept=ensemble.ave+ensemble.sd*c(-2,0,2),color="dodgerblue",linetype="dashed",size=1)+xlab("Height (inches)")
 
 ```
+
+- 1,078 fathers and sons; data collected in 1890s 
 
 ## Pearson-Lee height data
 
@@ -33,36 +35,44 @@ These heights are roughly $\, N(68.19, 2.82) \,$, so...
 >- but probably not by more than 2 SDs, `r round( 2*ensemble.sd, 2 )` inches.
 >- For better predictions, make more informed guesses!
 
-## Pearson-Lee height data
+## Pearson-Lee height data 
 
 ```{r echo=F,warning=F,message=F}
 ggplot( heights, aes(Father,Son) ) + geom_point()
 ```
 
-## Pearson-Lee height data {.smaller}
+- Correlation: `r round(cor(heights$Father,heights$Son),4)`
+
+## Pearson-Lee height data 
 
 ```{r echo=F,warning=F,message=F}
 son.table <- tibble("Father's rounded height"=son.stats$Group, "Number of sons"=son.stats$N, "Average height"=son.stats$Average, SD=son.stats$SD)
 knitr::kable( son.table[6:14,] )
 ```
 
-## Pearson-Lee height data
+## Pearson-Lee height data 
 
 ```{r echo=F,warning=F,message=F}
 ggplot( heights, aes(Father,Son) ) + geom_point() + gghighlight(Group == 65)
 ```
 
-## Pearson-Lee height data
+- Sons of 65" tall fathers
+
+## Pearson-Lee height data 
 
 ```{r echo=F,warning=F,message=F}
 ggplot( heights, aes(Father,Son) ) + geom_point() + gghighlight(Group == 71)
 ```
+
+- Sons of 71" tall fathers
 
 ## Pearson-Lee height data
 
 ```{r echo=F,warning=F,message=F}
 ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats, aes(Group, Average), color="deeppink", size=3)
 ```
+
+- Average heights for groups
 
 ## Pearson-Lee height data
 
@@ -71,65 +81,149 @@ ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats,
 
 ```
 
+- Average heights for groups with fitted line
+
 ## Pearson-Lee height data
 
-The average height of a group of sons seems to depend _linearly_ on the father's given height.
+The average height of a group of sons depends _linearly_ on the father's given height.
 
->- Using this data, $$\text{Average height of sons} = 33.89 + .514 \times \text{Father's height} \, ,$$ $$\text{i.e.}, \quad E( y \mid x ) = 33.89 + .514 \, x \ .$$
+>- Using this data, $$\text{Average height of sons} = 33.89 + .514 \times \text{Father's height} \, ,$$ $$\text{i.e.}, \quad \quad E( y \mid x ) = 33.89 + .514 \, x \ .$$
 >- This is _simple linear regression_, handled by `lm` in R :
 
 ## Pearson-Lee height data {.smaller}
 
 ```{r echo=F,warning=F,message=F}
-fit <- lm( Son ~ Father, data = heights)
-summary(fit)
+heights.fit <- lm( Son ~ Father, data = heights)
+summary( heights.fit )
 ```
 
 ## Pearson-Lee height data
 
-This dataset illustrates regression -- and the regression effect -- nicely, but things are  actually _too nice_ in this example!
+This dataset illustrates regression -- and the _regression effect_ -- nicely, but things are  actually _too nice_ in this example!
 
 >- Both variables are roughly normally distributed, which can be misleading.
->- Many interesting datasets are too small to organize into groups and compute group means.
+>- Many interesting datasets are too small to organize into groups and then compute group means.
 
-## UN data
+## UNICEF data
 
-Introduce the UN data
+The United Nations Children's Fund (UNICEF) provides [economic and social statistics for countries and territories](http://data.un.org/Explorer.aspx), 
+such as
+
+>- Adolescent birth rates
+>- Literacy rates
+>- Government expenditures on health and education
+>- Infant mortality rates
+>- Life expectancy
+
+## UNICEF data {.smaller}
+
+```{r echo=F,warning=F,message=F}
+africa <- read_csv("africa.csv")
+ggplot(africa, aes(Births,Deaths)) + geom_point() + xlab("Adolescent birth rate") + ylab("Infant mortality rate")
+```
+
+- 43 African countries; rates are numbers per 1,000 live births
+- Correlation: `r round(cor(africa$Births, africa$Deaths),4)`
+
+## UNICEF data {.smaller}
+
+```{r echo=F,warning=F,message=F}
+ggplot(africa, aes(Births,Deaths)) + geom_point() + geom_smooth(method="lm",se=F) + xlab("Adolescent birth rate") + ylab("Infant mortality rate")
+```
+
+$$\text{Average mortality rate} ~ = ~ 25.345 + .324 \times \text{Adolescent birth rate}$$
+
+## UNICEF data {.smaller}
+
+```{r echo=F,warning=F,message=F}
+africa.fit <- lm( Deaths ~ Births, data = africa )
+summary( africa.fit ) 
+```
 
 ## The simple linear regression model
 
-We use simple linear regression when we believe that $$y = \beta_{0} + \beta_{1} x + \epsilon \ . $$
+We use this model when we believe that $$y = \beta_{0} + \beta_{1} x + \epsilon \ . $$
 
->- **Assumptions**: the random error $\epsilon$ has _constant variance_ and _mean zero_.
->- **Consequence**: $$E(y \mid x) = \beta_{0} + \beta_{1}x$$
->- Also, assume that observations of the predictor are known _exactly_.
+>- **Main assumptions**: &nbsp; the random error $\epsilon$ has _constant variance_ and _mean zero_.
+>- **Consequences**: $$ E(y \mid x) = \beta_{0} + \beta_{1}x \quad , \quad \operatorname{Var}(y \mid x) = \sigma^2$$
+>- **Other assumptions**: &nbsp; individual errors are uncorrelated; values of the predictor are known _exactly_.
 
 ## The simple linear regression model
 
->- This model only makes sense if the mean response is a reasonable summary of $y$.
->- Neither the model parameters nor the additive error can be observed; they can only be estimated from observations.
+>- This model only makes sense if the mean response is a reasonable summary of $y$ -- not true for categorical responses!
+>- Neither the parameters nor the error can ever be known; they can only be estimated from observations.
 >- Nothing is assumed to be normally distributed...
 >- yet inferences and model assessment are still possible!
 
-## The Gauss-Markov Theorem
+## Ordinary least squares
 
->- Concisely: OLS is BLUE
+The standard method for estimating $\, \beta_{0} \,$ and $\, \beta_{1} \,$.
 
-## Markov's Inequality
+>- Candidate predictive model: $\quad \hat{y} ~ = ~ a + bx$
+>- Minimize the sum of squared residuals, $$\text{RSS} ~ = ~ \sum{ \left( y - \hat{y} \right)^2 } ~ = ~ \sum{ \left( y - a - bx \right)^2 }$$
+>- Calculus: $$\frac{\partial}{\partial a} \left( \text{RSS} \right) ~ = ~ 0 \quad \Longrightarrow \quad \hat{\beta}_{0} ~ = ~ \bar{y} - \hat{\beta}_{1} \, \bar{x}$$ $$\frac{\partial}{\partial b} \left( \text{RSS} \right) ~ = ~ 0 \quad \Longrightarrow \quad \hat{\beta}_{1} ~ = ~ r \left( \frac{ s_{y} }{ s_{x} } \right)$$
 
-## Chebyshev's Inequality
+## The Gauss-Markov theorem
 
-75% of observations are within 2 SDs -- no matter what!
+OLS is BLUE :
+
+>- These formulas are the **B**est **L**inear **U**nbiased **E**stimates: $$E( \hat{\beta}_{0} ) = \beta_{0} \ , \quad E( \hat{\beta}_{1} ) = \beta_{1} \ , \quad \text{minimal variance} \ .$$
+>- Only the previous assumptions are needed; no normality!
+>- This result relies on knowing the predictor's values exactly.
+
+## The Gauss-Markov theorem
+
+The _residual standard error_, $$\text{RSE} ~ = ~ \frac{ \text{RSS} }{ n-2 } ~ = ~ \frac{ \sum{ \left( y - \hat{y} \right)^2 } }{ n-2 } \ , $$
+is an unbiased estimate of $\, \sigma ~ = ~ \text{SD}( \epsilon ) \,$.
+
+>- Describes variability and compares models. Very practical!
+>- Heights: &nbsp; RSE = 2.437 inches &nbsp; versus &nbsp; SD($\, y \,$) = 2.81 inches
+>- UNICEF: &nbsp; RSE = 23.07 deaths &nbsp; versus &nbsp; SD($\, y \,$) = 28.49 deaths
+
+## Chebyshev's inequality
+
+75% of observations are within 2 SDs of the mean, regardless of distribution!
+
+>- If $\, X \,$ is a random variable with mean $\, \mu \,$ and SD $\, \sigma \,$, $$ \operatorname{Pr}\left\{ \ | X - \mu | > k \sigma \ \right\} ~ \leq ~ \frac{1}{k^2} \ .$$
+>- Follows from Markov's inequality, $$ \text{Markov!} $$
 
 ## The coefficient of determination
 
-blah
+This (possibly) useful diagnostic compares the regression model and the null model.
+
+>- $\text{OLS} \ \Longrightarrow \ \sum{ \left( y - \bar{y} \right)^2 } ~ = ~ \sum{ \left( y - \hat{y} \right)^2 } + \sum{ \left( \hat{y} - \bar{y} \right)^2 } \ .$
+>- Using the predictor reduces variability: $$\sum{ \left( \hat{y} - \bar{y} \right)^2 } ~ = ~ \sum{ \left( y - \bar{y} \right)^2 } - \sum{ \left( y - \hat{y} \right)^2 }$$
+>- Percentage reduction: $$R^2 ~ = ~ \frac{ \sum{ \left( \hat{y} - \bar{y} \right)^2 } }{ \sum{ \left( y - \bar{y} \right)^2 } } ~ = ~ 1 - \frac{ \sum{ \left( y - \hat{y} \right)^2 } }{\sum{ \left( y - \bar{y} \right)^2 }} \ .$$
+
+## The coefficient of determination
+
+$R^2$ is the relative reduction in variability gained by using the predictor instead of ignoring it. **Nothing more, nothing less!**
+
+>- It does not measure model fit. A true model can have a low $R^2$; an irrelevant model can have a large $R^2$.
+>- It does **not** explain the variation in $\, y \,$! 
+>- It always increases with additional predictors.
+>- Use with caution!
 
 ## Categorical data is not quantitative
 
 blah
 
+## UNICEF data {.smaller}
+
+```{r echo=F,warning=F,message=F}
+summary( africa.fit ) 
+```
+
 ## The normal regression model
 
-t-scores and whatnot, variable selection, ...
+Finally, consider adding the assumption that $$\epsilon ~ \sim ~ N(0, \sigma^2) \ .$$
 
+>- Yields formulas for sampling distributions:
+>- Enables inferences and hypothesis tests:
+
+## Summary
+
+>- Even simple linear regression is not so simple!
+>- Pay more attention to the RSE, less to $R^2$.
+>- Be sure to understand all those $t$-scores and $p$-values before (mis)using them.
+>- Don't use linear regression to model categorical responses.
