@@ -144,9 +144,9 @@ summary( africa.fit )
 
 We use this model when we believe that $$y = \beta_{0} + \beta_{1} x + \epsilon \ . $$
 
->- **Main assumptions**: &nbsp; the random error $\epsilon$ has _constant variance_ and _mean zero_.
+>- **Main assumptions**: &nbsp; the random error $\epsilon$ has _constant variance_ and _mean zero_ and is uncorrelated across observations.
 >- **Consequences**: $$ E(y \mid x) = \beta_{0} + \beta_{1}x \quad , \quad \operatorname{Var}(y \mid x) = \sigma^2$$
->- **Other assumptions**: &nbsp; individual errors are uncorrelated; values of the predictor are known _exactly_.
+>- **Another assumption**: &nbsp; values of the predictor are known _exactly_.
 
 ## The simple linear regression model
 
