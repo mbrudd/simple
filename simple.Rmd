@@ -101,8 +101,8 @@ summary( heights.fit )
 
 This dataset illustrates regression -- and the _regression effect_ -- nicely, but things are  actually _too nice_ in this example!
 
->- Both variables are roughly normally distributed, which can be misleading.
->- Many interesting datasets are too small to organize into groups and then compute group means.
+>- Both variables are roughly normally distributed, which is not necessary at all.
+>- Many interesting datasets are too small to organize into groups, compute group means, and observe the linear relationship so easily.
 
 ## UNICEF data
 
@@ -142,22 +142,22 @@ summary( africa.fit )
 
 ## The simple linear regression model
 
-We use this model when we believe that $$y = \beta_{0} + \beta_{1} x + \epsilon \ . $$
+We use this model when we _believe_ that $$y ~ = ~ \beta_{0} + \beta_{1} x + \epsilon \ . $$
 
 >- **Main assumptions**: &nbsp; the random error $\epsilon$ has _constant variance_ and _mean zero_ and is uncorrelated across observations.
->- **Consequences**: $$ E(y \mid x) = \beta_{0} + \beta_{1}x \quad , \quad \operatorname{Var}(y \mid x) = \sigma^2$$
+>- **Consequences**: $$ E(y \mid x) = \beta_{0} + \beta_{1}x \ , \ \operatorname{Var}(y \mid x) = \sigma^2$$
 >- **Another assumption**: &nbsp; values of the predictor are known _exactly_.
 
 ## The simple linear regression model
 
->- This model only makes sense if the mean response is a reasonable summary of $y$ -- not true for categorical responses!
+>- This model only makes sense if the mean response is a reasonable summary of $y$. &nbsp; Not true for categorical responses!
 >- Neither the parameters nor the error can ever be known; they can only be estimated from observations.
 >- Nothing is assumed to be normally distributed...
 >- yet inferences and model assessment are still possible!
 
 ## Ordinary least squares
 
-The standard method for estimating $\, \beta_{0} \,$ and $\, \beta_{1} \,$.
+This is the standard method for estimating $\, \beta_{0} \,$ and $\, \beta_{1} \,$.
 
 >- Candidate predictive model: $\quad \hat{y} ~ = ~ a + bx$
 >- Minimize the sum of squared residuals, $$\text{RSS} ~ = ~ \sum{ \left( y - \hat{y} \right)^2 } ~ = ~ \sum{ \left( y - a - bx \right)^2 }$$
@@ -189,7 +189,7 @@ is an unbiased estimate of $\, \sigma ~ = ~ \text{SD}( \epsilon ) \,$.
 
 ## The coefficient of determination
 
-This (possibly) useful diagnostic compares the regression model and the null model.
+This (possibly) useful diagnostic compares the _regression model_ and the _null model_.
 
 >- $\text{OLS} \ \Longrightarrow \ \sum{ \left( y - \bar{y} \right)^2 } ~ = ~ \sum{ \left( y - \hat{y} \right)^2 } + \sum{ \left( \hat{y} - \bar{y} \right)^2 } \ .$
 >- Using the predictor reduces variability: $$\sum{ \left( \hat{y} - \bar{y} \right)^2 } ~ = ~ \sum{ \left( y - \bar{y} \right)^2 } - \sum{ \left( y - \hat{y} \right)^2 }$$
@@ -199,7 +199,7 @@ This (possibly) useful diagnostic compares the regression model and the null mod
 
 $R^2$ is the relative reduction in variability gained by using the predictor instead of ignoring it. **Nothing more, nothing less!**
 
->- It does not measure model fit. A true model can have a low $R^2$; an irrelevant model can have a large $R^2$.
+>- It does **not** measure model fit. A true model can have a low $R^2$; an irrelevant model can have a large $R^2$.
 >- It does **not** explain the variation in $\, y \,$! 
 >- It always increases with additional predictors.
 >- Use with caution!
@@ -225,5 +225,6 @@ Finally, consider adding the assumption that $$\epsilon ~ \sim ~ N(0, \sigma^2) 
 
 >- Even simple linear regression is not so simple!
 >- Pay more attention to the RSE, less to $R^2$.
+>- Stop spreading the rumor that normality is required for linear regression.
 >- Be sure to understand all those $t$-scores and $p$-values before (mis)using them.
 >- Don't use linear regression to model categorical responses.
