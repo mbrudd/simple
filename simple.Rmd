@@ -15,25 +15,27 @@ library(tidyverse)
 library(gghighlight)
 
 heights <- read_csv("pearson.csv")
-ensemble <- stack(heights)
-ensemble.ave <- mean( ensemble$values )
-ensemble.sd <- sd( ensemble$values )
+# ensemble <- stack(heights)
+# ensemble.ave <- mean( ensemble$values )
+# ensemble.sd <- sd( ensemble$values )
+son.ave <- mean( heights$Son )
+son.sd <- sd( heights$Son )
 heights <- heights %>% mutate(Group = round(Father))
 son.stats <- heights %>% group_by(Group) %>% summarize(N = n(), Average = round(mean(Son),2), SD = round(sd(Son),2))
-ggplot(ensemble,aes(values))+geom_histogram()+geom_vline(xintercept=ensemble.ave+ensemble.sd*c(-2,0,2),color="dodgerblue",linetype="dashed",size=1)+xlab("Height (inches)")
+ggplot(heights,aes(Son))+geom_histogram()+geom_vline(xintercept=son.ave+son.sd*c(-2,0,2),color="dodgerblue",linetype="dashed",size=1)+xlab("Height (inches)")
 
 ```
 
-- 1,078 fathers and sons; data collected in 1890s 
+- 1,078 men; data collected in 1890s 
 
 ## Pearson-Lee height data
 
-These heights are roughly $\, N(68.19, 2.82) \,$, so...
+These heights are roughly $\, N(68.68, 2.81) \,$, so...
 
->- our best guess of a height is the average, `r round( ensemble.ave, 2 )` inches, 
+>- our best guess of a height is the average, `r round( son.ave, 2 )` inches, 
 >- which will likely be wrong, 
->- but probably not by more than 2 SDs, `r round( 2*ensemble.sd, 2 )` inches.
->- For better predictions, make more informed guesses!
+>- but probably not by more than 2 SDs, `r round( 2*son.sd, 2 )` inches.
+>- This is a **_null model_**. &nbsp; Are more informed guesses better?
 
 ## Pearson-Lee height data 
 
@@ -69,7 +71,7 @@ ggplot( heights, aes(Father,Son) ) + geom_point() + gghighlight(Group == 71)
 ## Pearson-Lee height data
 
 ```{r echo=F,warning=F,message=F}
-ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats, aes(Group, Average), color="deeppink", size=3)
+ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats, aes(Group, Average), color="deeppink2", size=3)
 ```
 
 - Average heights for groups
@@ -77,7 +79,7 @@ ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats,
 ## Pearson-Lee height data
 
 ```{r echo=F,warning=F,message=F}
-ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats, aes(Group, Average), color="deeppink", size=3)+ geom_smooth( method="lm", level=0 )
+ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats, aes(Group, Average), color="deeppink2", size=3)+ geom_smooth( method="lm", level=0 )
 
 ```
 
@@ -88,7 +90,7 @@ ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats,
 The average height of a group of sons depends _linearly_ on the father's given height.
 
 >- Using this data, $$\text{Average height of sons} = 33.89 + .514 \times \text{Father's height} \, ,$$ $$\text{i.e.}, \quad \quad E( y \mid x ) = 33.89 + .514 \, x \ .$$
->- This is _simple linear regression_, handled by `lm` in R :
+>- This is **_simple linear regression_**, handled by `lm` in R :
 
 ## Pearson-Lee height data {.smaller}
 
@@ -99,7 +101,7 @@ summary( heights.fit )
 
 ## Pearson-Lee height data
 
-This dataset illustrates regression -- and the _regression effect_ -- nicely, but things are  actually _too nice_ in this example!
+This dataset illustrates regression -- and the **_regression effect_** -- nicely, but things are  actually _too nice_ in this example!
 
 >- Both variables are roughly normally distributed, which is not necessary at all.
 >- Many interesting datasets are too small to organize into groups, compute group means, and observe the linear relationship so easily.
@@ -144,7 +146,7 @@ summary( africa.fit )
 
 We use this model when we _believe_ that $$y ~ = ~ \beta_{0} + \beta_{1} x + \epsilon \ . $$
 
->- **Main assumptions**: &nbsp; the random error $\epsilon$ has _constant variance_ and _mean zero_ and is uncorrelated across observations.
+>- **Main assumptions**: &nbsp; the random error $\epsilon$ has **_constant variance_** and **_mean zero_** and is uncorrelated across observations.
 >- **Consequences**: $$ E(y \mid x) = \beta_{0} + \beta_{1}x \ , \ \operatorname{Var}(y \mid x) = \sigma^2$$
 >- **Another assumption**: &nbsp; values of the predictor are known _exactly_.
 
@@ -152,7 +154,7 @@ We use this model when we _believe_ that $$y ~ = ~ \beta_{0} + \beta_{1} x + \ep
 
 >- This model only makes sense if the mean response is a reasonable summary of $y$. &nbsp; Not true for categorical responses!
 >- Neither the parameters nor the error can ever be known; they can only be estimated from observations.
->- Nothing is assumed to be normally distributed...
+>- **_Nothing is assumed to be normally distributed..._**
 >- yet inferences and model assessment are still possible!
 
 ## Ordinary least squares
@@ -167,29 +169,32 @@ This is the standard method for estimating $\, \beta_{0} \,$ and $\, \beta_{1} \
 
 OLS is BLUE :
 
->- These formulas are the **B**est **L**inear **U**nbiased **E**stimates: $$E( \hat{\beta}_{0} ) = \beta_{0} \ , \quad E( \hat{\beta}_{1} ) = \beta_{1} \ , \quad \text{minimal variance} \ .$$
+>- These formulas are the **_B_**est **_L_**inear **_U_**nbiased **_E_**stimates: $$E( \hat{\beta}_{0} ) = \beta_{0} \ , \quad E( \hat{\beta}_{1} ) = \beta_{1} \ , \quad \text{minimal variance} \ .$$
 >- Only the previous assumptions are needed; no normality!
 >- This result relies on knowing the predictor's values exactly.
 
 ## The Gauss-Markov theorem
 
-The _residual standard error_, $$\text{RSE} ~ = ~ \frac{ \text{RSS} }{ n-2 } ~ = ~ \frac{ \sum{ \left( y - \hat{y} \right)^2 } }{ n-2 } \ , $$
-is an unbiased estimate of $\, \sigma ~ = ~ \text{SD}( \epsilon ) \,$.
+The **_mean standard error_**, $$\text{MSE} ~ = ~ \frac{ \text{RSS} }{ n-2 } ~ = ~ \frac{ \sum{ \left( y - \hat{y} \right)^2 } }{ n-2 } \ , $$
+is an unbiased estimate of $\, \sigma^2 ~ = ~ \operatorname{Var}( \epsilon ) \,$.
 
->- Describes variability and compares models. Very practical!
+>- The **_residual standard error_**, $\, \text{RSE} ~ = ~ \sqrt{\text{MSE}} \,$, is more practical; describes variability and compares models. 
 >- Heights: &nbsp; RSE = 2.437 inches &nbsp; versus &nbsp; SD($\, y \,$) = 2.81 inches
 >- UNICEF: &nbsp; RSE = 23.07 deaths &nbsp; versus &nbsp; SD($\, y \,$) = 28.49 deaths
 
 ## Chebyshev's inequality
 
-75% of observations are within 2 SDs of the mean, regardless of distribution!
+>- If $\, Y \,$ is a random variable with mean $\, \mu \,$ and SD $\, \sigma \,$, then $$ \operatorname{Pr}\left\{ \ | Y - \mu | > k \sigma \ \right\} ~ \leq ~ \frac{1}{k^2} \ .$$
+>- True regardless of distribution!
+>- If the regression model is correct, then at least 75% of responses will be within 2 RSEs of the regression line.
 
->- If $\, X \,$ is a random variable with mean $\, \mu \,$ and SD $\, \sigma \,$, $$ \operatorname{Pr}\left\{ \ | X - \mu | > k \sigma \ \right\} ~ \leq ~ \frac{1}{k^2} \ .$$
->- Follows from Markov's inequality, $$ \text{Markov!} $$
+## Chebyshev's inequality
+
+Follows from Markov's inequality, $$ \text{Markov!} $$
 
 ## The coefficient of determination
 
-This (possibly) useful diagnostic compares the _regression model_ and the _null model_.
+This descriptive statistic compares the regression model and the null model.
 
 >- $\text{OLS} \ \Longrightarrow \ \sum{ \left( y - \bar{y} \right)^2 } ~ = ~ \sum{ \left( y - \hat{y} \right)^2 } + \sum{ \left( \hat{y} - \bar{y} \right)^2 } \ .$
 >- Using the predictor reduces variability: $$\sum{ \left( \hat{y} - \bar{y} \right)^2 } ~ = ~ \sum{ \left( y - \bar{y} \right)^2 } - \sum{ \left( y - \hat{y} \right)^2 }$$
@@ -197,12 +202,12 @@ This (possibly) useful diagnostic compares the _regression model_ and the _null 
 
 ## The coefficient of determination
 
-$R^2$ is the relative reduction in variability gained by using the predictor instead of ignoring it. **Nothing more, nothing less!**
+$R^2$ is the _relative_ reduction in variability gained by using the predictor instead of ignoring it. **Nothing more, nothing less!**
 
->- It does **not** measure model fit. A true model can have a low $R^2$; an irrelevant model can have a large $R^2$.
->- It does **not** explain the variation in $\, y \,$! 
->- It always increases with additional predictors.
->- Use with caution!
+>- Beware: &nbsp; A true model can have a low $R^2$; an irrelevant model can have a large $R^2$.
+>- It does **_not_** &nbsp; "explain the variation" &nbsp; in $\, y \,$! 
+>- It can only increase when adding predictors -- adjusting $R^2$ doesn't really help.
+>- Use with care -- and look at your data!
 
 ## Categorical data is not quantitative
 
