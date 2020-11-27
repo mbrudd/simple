@@ -3,10 +3,23 @@ title: "The complex inner life of simple regression"
 author: "Matthew Rudd"
 date: "Math for Data Science Conference, 12/1/20"
 output:
-  ioslides_presentation: default
-  beamer_presentation: default
-  slidy_presentation: default
+  ioslides_presentation:
+    widescreen: true
+    transition: faster
 ---
+<style type="text/css">
+slides > slide:not(.nobackground):after {
+  content: '';
+}
+</style>
+
+## Regression and data science
+
+>- Basic goal: &nbsp; _genuine insight_ &nbsp; that &nbsp; _people_ &nbsp; can understand
+>- Regression models are supposedly easy to build and to interpret...
+>- but experience suggests otherwise!
+>- To master regression, you have to understand the underlying mathematics and philosophy.
+>- Even simple regression is not so simple! 
 
 ## Pearson-Lee height data 
 
@@ -15,9 +28,6 @@ library(tidyverse)
 library(gghighlight)
 
 heights <- read_csv("pearson.csv")
-# ensemble <- stack(heights)
-# ensemble.ave <- mean( ensemble$values )
-# ensemble.sd <- sd( ensemble$values )
 son.ave <- mean( heights$Son )
 son.sd <- sd( heights$Son )
 heights <- heights %>% mutate(Group = round(Father))
@@ -30,12 +40,12 @@ ggplot(heights,aes(Son))+geom_histogram()+geom_vline(xintercept=son.ave+son.sd*c
 
 ## Pearson-Lee height data
 
-These heights are roughly $\, N(68.68, 2.81) \,$, so...
+These heights are roughly $~ N(68.68, 2.81)$, &nbsp; so...
 
 >- our best guess of a height is the average, `r round( son.ave, 2 )` inches, 
 >- which will likely be wrong, 
 >- but probably not by more than 2 SDs, `r round( 2*son.sd, 2 )` inches.
->- This is a **_null model_**. &nbsp; Are more informed guesses better?
+>- This is a &nbsp; **_null model_**. &nbsp; More informed guesses should be better...
 
 ## Pearson-Lee height data 
 
@@ -89,22 +99,23 @@ ggplot( heights, aes(Father,Son) ) + geom_point() + geom_point(data = son.stats,
 
 The average height of a group of sons depends _linearly_ on the father's given height.
 
->- Using this data, $$\text{Average height of sons} = 33.89 + .514 \times \text{Father's height} \, ,$$ $$\text{i.e.}, \quad \quad E( y \mid x ) = 33.89 + .514 \, x \ .$$
->- This is **_simple linear regression_**, handled by `lm` in R :
+>- $$\text{Average height of sons} = 33.89 + .514 \times \text{Father's height} \, ,$$ 
+>- $$\text{i.e.}, \quad \quad E( y \mid x ) ~ = ~ 33.89 + .514 \, x \ .$$
+>- This is &nbsp; **_simple linear regression_**, &nbsp; handled by &nbsp; `lm` &nbsp; in R :
 
 ## Pearson-Lee height data {.smaller}
 
-```{r echo=F,warning=F,message=F}
+```{r echo=T,warning=F,message=F}
 heights.fit <- lm( Son ~ Father, data = heights)
 summary( heights.fit )
 ```
 
 ## Pearson-Lee height data
 
-This dataset illustrates regression -- and the **_regression effect_** -- nicely, but things are  actually _too nice_ in this example!
+This dataset illustrates regression nicely, but things are actually _too nice_ in this example!
 
->- Both variables are roughly normally distributed, which is not necessary at all.
->- Many interesting datasets are too small to organize into groups, compute group means, and observe the linear relationship so easily.
+>- Both variables are roughly normally distributed, neither of which is necessary.
+>- Many interesting datasets are too small to compute group means and observe the linear relationship directly.
 
 ## UNICEF data
 
@@ -115,7 +126,7 @@ such as
 >- Literacy rates
 >- Government expenditures on health and education
 >- Infant mortality rates
->- Life expectancy
+>- Life expectancies
 
 ## UNICEF data {.smaller}
 
@@ -137,22 +148,82 @@ $$\text{Average mortality rate} ~ = ~ 25.345 + .324 \times \text{Adolescent birt
 
 ## UNICEF data {.smaller}
 
-```{r echo=F,warning=F,message=F}
+```{r echo=T,warning=F,message=F}
 africa.fit <- lm( Deaths ~ Births, data = africa )
 summary( africa.fit ) 
 ```
+
+- This model is more _descriptive_ than predictive; it is _not_ causal!
+
+## College enrollment
+
+All businesses have to anticipate demand -- colleges have to predict enrollment. 
+
+>- A simple idea: &nbsp; use birth statistics, since students were born about 20 years before they enroll.
+>- The [National Center for Health Statistics](https://www.cdc.gov/nchs/data-visualization/natality-trends/) provides birth data.
+>- The [National Center for Education Statistics](https://nces.ed.gov/programs/digest/current_tables.asp) provides enrollment data. 
+
+## College enrollment
+
+```{r echo=F,warning=F,message=F}
+enroll <- read_csv("enrollment.csv")
+enroll <- enroll %>% mutate( Births = Births / 1000000, Enrollment = Enrollment / 1000000)
+trend <- enroll %>% filter(EnrollmentYear > 1980 & EnrollmentYear < 2019)
+ggplot(trend,aes(EnrollmentYear,Enrollment)) + geom_line() + geom_point() + xlab("Year") + ylab("Enrollment (millions)")
+```
+
+- Full-time U.S. undergraduate enrollments, 1985 to 2018
+
+## College enrollment
+
+```{r echo=F,warning=F,message=F}
+train <- enroll %>% filter( BirthYear < 1999) %>% filter(BirthYear > 1978)
+ggplot(train, aes(Births,Enrollment))+geom_point()+xlab("Births (millions)")+ylab("Enrollment (millions)")
+```
+
+- Correlation: `r round(cor(train$Births,train$Enrollment),3)` (!)
+
+## College enrollment
+
+```{r echo=F,warning=F,message=F}
+ggplot(train, aes(Births,Enrollment))+geom_point()+geom_smooth(method="lm",se=F)+xlab("Births (millions)")+ylab("Enrollment (millions)")
+```
+
+$$\text{Predicted enrollment} ~ = ~ 8.8 \times \text{Births} - 17.9$$
+
+## College enrollment {.smaller}
+
+```{r echo=T,warning=F,message=F}
+enroll.fit <- lm( Enrollment ~ Births, data = train)
+summary(enroll.fit)
+```
+
+## College enrollment
+
+```{r echo=F,warning=F,message=F}
+
+new <- enroll %>% filter(BirthYear > 1998) %>% select(BirthYear, Births, EnrollmentYear)
+predictions <- predict(enroll.fit,new,interval="prediction")
+predictions <- data.frame( new, Enrollment = predictions[,1], Lower = predictions[,2], Upper = predictions[,3])
+predictions <- predictions %>% select(BirthYear:Enrollment) %>% mutate( Type = "Predicted") 
+trend <- trend %>% mutate( Type = "Observed")
+combined <- rbind(trend,predictions)
+ggplot(combined, aes(EnrollmentYear,Enrollment,color=Type))+geom_point()+geom_line()+xlab("Year")+ylab("Enrollment (millions)")
+```
+
+- Higher education is getting even more competitive!
 
 ## The simple linear regression model
 
 We use this model when we _believe_ that $$y ~ = ~ \beta_{0} + \beta_{1} x + \epsilon \ . $$
 
->- **Main assumptions**: &nbsp; the random error $\epsilon$ has **_constant variance_** and **_mean zero_** and is uncorrelated across observations.
->- **Consequences**: $$ E(y \mid x) = \beta_{0} + \beta_{1}x \ , \ \operatorname{Var}(y \mid x) = \sigma^2$$
+>- **Main assumptions**: &nbsp; the random error $~ \epsilon ~$ has &nbsp; **_constant variance_** &nbsp; and &nbsp; **_mean zero_** &nbsp; and is uncorrelated across observations.
+>- **Consequences**: $$ E(y \mid x) ~ = ~ \beta_{0} + \beta_{1}x \quad , \quad \operatorname{Var}(y \mid x) ~ = ~ \sigma^2$$
 >- **Another assumption**: &nbsp; values of the predictor are known _exactly_.
 
 ## The simple linear regression model
 
->- This model only makes sense if the mean response is a reasonable summary of $y$. &nbsp; Not true for categorical responses!
+>- This model makes sense if the mean is a reasonable summary of $y$. &nbsp; Not true for categorical responses!
 >- Neither the parameters nor the error can ever be known; they can only be estimated from observations.
 >- **_Nothing is assumed to be normally distributed..._**
 >- yet inferences and model assessment are still possible!
@@ -175,22 +246,20 @@ OLS is BLUE :
 
 ## The Gauss-Markov theorem
 
-The **_mean standard error_**, $$\text{MSE} ~ = ~ \frac{ \text{RSS} }{ n-2 } ~ = ~ \frac{ \sum{ \left( y - \hat{y} \right)^2 } }{ n-2 } \ , $$
-is an unbiased estimate of $\, \sigma^2 ~ = ~ \operatorname{Var}( \epsilon ) \,$.
+The **_residual standard error_**, 
+$$\text{RSE} ~ = ~ \sqrt{ \frac{ \text{RSS} }{ \ n-2 \ }} ~ = ~ \sqrt{ \frac{ \ \sum{ \left( y - \hat{y} \right)^2 } \ }{ n-2 }} \quad , $$
+is an unbiased estimate of $~ \sigma ~ = ~ \operatorname{SD}( \epsilon ) \,$.
 
->- The **_residual standard error_**, $\, \text{RSE} ~ = ~ \sqrt{\text{MSE}} \,$, is more practical; describes variability and compares models. 
+>- Describes variability and compares models; very practical!
 >- Heights: &nbsp; RSE = 2.437 inches &nbsp; versus &nbsp; SD($\, y \,$) = 2.81 inches
 >- UNICEF: &nbsp; RSE = 23.07 deaths &nbsp; versus &nbsp; SD($\, y \,$) = 28.49 deaths
+>- Enrollment: &nbsp; RSE = .389 million students &nbsp; versus &nbsp; SD($\, y \,$) = 1.67 million students
 
 ## Chebyshev's inequality
 
->- If $\, Y \,$ is a random variable with mean $\, \mu \,$ and SD $\, \sigma \,$, then $$ \operatorname{Pr}\left\{ \ | Y - \mu | > k \sigma \ \right\} ~ \leq ~ \frac{1}{k^2} \ .$$
+>- If $~ Y ~$ is a random variable with mean $~ \mu ~$ and SD $~ \sigma ~$, then $$ \operatorname{Pr}\left\{ \ | Y - \mu | > k \sigma \ \right\} ~ \leq ~ \frac{1}{k^2} \ .$$
 >- True regardless of distribution!
->- If the regression model is correct, then at least 75% of responses will be within 2 RSEs of the regression line.
-
-## Chebyshev's inequality
-
-Follows from Markov's inequality, $$ \text{Markov!} $$
+>- If the regression model is correct, then at least 75% of responses will be within about 2 RSEs of the regression line.
 
 ## The coefficient of determination
 
@@ -198,38 +267,46 @@ This descriptive statistic compares the regression model and the null model.
 
 >- $\text{OLS} \ \Longrightarrow \ \sum{ \left( y - \bar{y} \right)^2 } ~ = ~ \sum{ \left( y - \hat{y} \right)^2 } + \sum{ \left( \hat{y} - \bar{y} \right)^2 } \ .$
 >- Using the predictor reduces variability: $$\sum{ \left( \hat{y} - \bar{y} \right)^2 } ~ = ~ \sum{ \left( y - \bar{y} \right)^2 } - \sum{ \left( y - \hat{y} \right)^2 }$$
->- Percentage reduction: $$R^2 ~ = ~ \frac{ \sum{ \left( \hat{y} - \bar{y} \right)^2 } }{ \sum{ \left( y - \bar{y} \right)^2 } } ~ = ~ 1 - \frac{ \sum{ \left( y - \hat{y} \right)^2 } }{\sum{ \left( y - \bar{y} \right)^2 }} \ .$$
+>- Percentage reduction: $$R^2 ~ = ~ \frac{ \sum{ \left( \hat{y} - \bar{y} \right)^2 } }{ \ \sum{ \left( y - \bar{y} \right)^2 } \ } ~ = ~ 1 ~ - ~ \frac{ \sum{ \left( y - \hat{y} \right)^2 } }{ \ \sum{ \left( y - \bar{y} \right)^2 } \ } \ .$$
 
 ## The coefficient of determination
 
-$R^2$ is the _relative_ reduction in variability gained by using the predictor instead of ignoring it. **Nothing more, nothing less!**
+$R^2$ is the _relative_ reduction in variability from using the predictor instead of ignoring it. **That's all it is!**
 
->- Beware: &nbsp; A true model can have a low $R^2$; an irrelevant model can have a large $R^2$.
->- It does **_not_** &nbsp; "explain the variation" &nbsp; in $\, y \,$! 
+>- Beware: &nbsp; A correct model can have a low $R^2$ ; an irrelevant model can have a large $R^2$.
+>- It does &nbsp; **_not_** &nbsp; "explain the variation" &nbsp; in $\, y \,$! 
 >- It can only increase when adding predictors -- adjusting $R^2$ doesn't really help.
 >- Use with care -- and look at your data!
 
-## Categorical data is not quantitative
+## The normal regression model
 
-blah
+What happens if $~ \epsilon ~ \sim ~ N(0, \sigma^2) \,$ ?
 
-## UNICEF data {.smaller}
+>- $y ~ \sim ~ N(\beta_{0} + \beta_{1}x, \sigma^2)$
+>- Regression coefficients have normal sampling distributions, so
+>- their &nbsp; _studentized statistics_ &nbsp; are $\, t$-distributed : for the slope, $$\frac{ \, \hat{\beta}_{1} - \beta_{1} \, }{ \text{SE}({\hat{\beta}_{1}}) } ~ \sim ~ t(n-2) \, ,$$ $$\text{where} \quad \text{SE}({\hat{\beta}_{1}}) ~ = ~ \frac{\text{RSE}}{\sqrt{ \, \sum{(x - \bar{x})^2} \, } } \ .$$
+
+## The normal regression model {.smaller}
+
+The table summarizing &nbsp; `lm` &nbsp; is based on this normal assumption:
 
 ```{r echo=F,warning=F,message=F}
-summary( africa.fit ) 
+summary(enroll.fit)
 ```
 
 ## The normal regression model
 
-Finally, consider adding the assumption that $$\epsilon ~ \sim ~ N(0, \sigma^2) \ .$$
+This facilitates traditional procedures. For the slope, for example:
 
->- Yields formulas for sampling distributions:
->- Enables inferences and hypothesis tests:
+>- test $~ H_{0} \, : \, \beta_{1} = 0 ~$ with $~ t = \frac{ \hat{\beta}_{1} }{ \text{SE}({\hat{\beta}_{1}}) } ~$ ; &nbsp; learn what $\, p$-values mean!
+>- use $~ \hat{\beta}_{1} ~$ and $~ \text{SE}({\hat{\beta}_{1}}) ~$ to compute interval estimates of $~ \beta_{1} ~$ : $$\hat{\beta}_{1} - t^{*} \, \text{SE}({\hat{\beta}_{1}}) ~ \leq ~ \beta_{1} ~ \leq \hat{\beta}_{1} + t^{*} \, \text{SE}({\hat{\beta}_{1}})$$
 
-## Summary
+## The normal regression model
 
->- Even simple linear regression is not so simple!
->- Pay more attention to the RSE, less to $R^2$.
->- Stop spreading the rumor that normality is required for linear regression.
->- Be sure to understand all those $t$-scores and $p$-values before (mis)using them.
->- Don't use linear regression to model categorical responses.
+Coefficient estimates in R :
+```{r echo=T,warning=F,message=F}
+confint(enroll.fit)
+```
+ 
+>- Without assuming normality, use the bootstrap to approximate SEs and obtain interval estimates.
+>- When adding predictors, everything gets even more complicated!
