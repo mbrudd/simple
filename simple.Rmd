@@ -172,7 +172,7 @@ births <- enroll %>% filter(BirthYear > 1964 )
 ggplot(births,aes(BirthYear,Births)) + geom_line() + geom_point() + xlab("Year") + ylab("Births (millions)")
 ```
 
-- U.S. births per year, 1965 to 2011
+- U.S. births per year, 1965 to 2018
 
 ## College enrollment
 
