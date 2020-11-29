@@ -168,6 +168,15 @@ All businesses have to anticipate demand -- colleges have to predict enrollment.
 ```{r echo=F,warning=F,message=F}
 enroll <- read_csv("enrollment.csv")
 enroll <- enroll %>% mutate( Births = Births / 1000000, Enrollment = Enrollment / 1000000)
+births <- enroll %>% filter(BirthYear > 1964 )
+ggplot(births,aes(BirthYear,Births)) + geom_line() + geom_point() + xlab("Year") + ylab("Births (millions)")
+```
+
+- U.S. births per year, 1965 to 2011
+
+## College enrollment
+
+```{r echo=F,warning=F,message=F}
 trend <- enroll %>% filter(EnrollmentYear > 1980 & EnrollmentYear < 2019)
 ggplot(trend,aes(EnrollmentYear,Enrollment)) + geom_line() + geom_point() + xlab("Year") + ylab("Enrollment (millions)")
 ```
@@ -242,7 +251,7 @@ OLS is BLUE :
 
 >- These formulas are the **_B_**est **_L_**inear **_U_**nbiased **_E_**stimates: $$E( \hat{\beta}_{0} ) = \beta_{0} \ , \quad E( \hat{\beta}_{1} ) = \beta_{1} \ , \quad \text{minimal variance} \ .$$
 >- Only the previous assumptions are needed; no normality!
->- This result relies on knowing the predictor's values exactly.
+>- The proof relies on knowing the predictor's values exactly.
 
 ## The Gauss-Markov theorem
 
